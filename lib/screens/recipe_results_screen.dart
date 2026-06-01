@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/ai_service.dart';
 
-class RecipeResultsScreen extends StatelessWidget {
-
+class RecipeResultsScreen extends StatefulWidget {
   final String ingredients;
 
   const RecipeResultsScreen({
@@ -10,64 +10,120 @@ class RecipeResultsScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  State<RecipeResultsScreen> createState() =>
+      _RecipeResultsScreenState();
+}
 
-    final recipes = [
-      "Paneer Bhurji",
-      "Kadai Paneer",
-      "Paneer Masala",
-      "Paneer Stir Fry",
-    ];
+class _RecipeResultsScreenState
+    extends State<RecipeResultsScreen> {
+
+  List<String> recipes = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRecipes();
+  }
+
+  Future<void> fetchRecipes() async {
+    try {
+
+      final result =
+          await AIService.generateRecipes(
+        widget.ingredients,
+      );
+
+      setState(() {
+        recipes = result;
+        isLoading = false;
+      });
+
+    } catch (e) {
+
+      setState(() {
+        isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(
+        SnackBar(
+          content: Text(
+            e.toString(),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Suggested Recipes"),
+        title: const Text(
+          "Suggested Recipes",
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-          children: [
+        child: isLoading
 
-            Text(
-              "Ingredients:",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge,
-            ),
+            ? const Center(
+                child:
+                    CircularProgressIndicator(),
+              )
 
-            const SizedBox(height: 10),
+            : Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
 
-            Text(ingredients),
+                  Text(
+                    "Ingredients:",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge,
+                  ),
 
-            const SizedBox(height: 30),
+                  const SizedBox(height: 10),
 
-            Text(
-              "Recipes",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge,
-            ),
+                  Text(widget.ingredients),
 
-            const SizedBox(height: 10),
+                  const SizedBox(height: 30),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: recipes.length,
-                itemBuilder:
-                    (context, index) {
-                  return Card(
-                    child: ListTile(
-                      title:
-                          Text(recipes[index]),
+                  Text(
+                    "Recipes",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: recipes.length,
+                      itemBuilder:
+                          (context, index) {
+
+                        return Card(
+                          child: ListTile(
+                            leading:
+                                const Icon(
+                              Icons.restaurant,
+                            ),
+                            title:
+                                Text(
+                              recipes[index],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
