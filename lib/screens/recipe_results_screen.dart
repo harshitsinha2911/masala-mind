@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/ai_service.dart';
+import 'recipe_detail_screen.dart';
 
 class RecipeResultsScreen extends StatefulWidget {
   final String ingredients;
@@ -108,17 +109,34 @@ class _RecipeResultsScreenState
                           (context, index) {
 
                         return Card(
-                          child: ListTile(
-                            leading:
-                                const Icon(
-                              Icons.restaurant,
-                            ),
-                            title:
-                                Text(
-                              recipes[index],
-                            ),
-                          ),
-                        );
+  child: ListTile(
+    leading: const Icon(
+      Icons.restaurant,
+    ),
+
+    title: Text(
+      recipes[index],
+    ),
+
+    trailing: const Icon(
+      Icons.arrow_forward_ios,
+    ),
+
+    onTap: () {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              RecipeDetailScreen(
+                recipeName: recipes[index],
+                userIngredients: widget.ingredients,
+          ),
+        ),
+      );
+    },
+  ),
+);
                       },
                     ),
                   ),
